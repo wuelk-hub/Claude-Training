@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tool Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      height: 100vh;
+      background: #1a1a2e;
+      color: #e0e0e0;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: #16213e;
+      border-right: 1px solid #0f3460;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid #0f3460;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-header h2 {
+      font-size: 18px;
+      color: #e94560;
+      font-weight: 600;
+    }
+
+    .sidebar-header .logo {
+      width: 28px;
+      height: 28px;
+      background: #e94560;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+      color: white;
+    }
+
+    .add-tool-section {
+      padding: 16px;
+      border-bottom: 1px solid #0f3460;
+    }
+
+    .add-tool-form {
+      display: flex;
+      gap: 8px;
+    }
+
+    .add-tool-form input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #0f3460;
+      border-radius: 6px;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .add-tool-form input:focus {
+      border-color: #e94560;
+    }
+
+    .add-tool-form input::placeholder {
+      color: #555;
+    }
+
+    .add-tool-form button {
+      padding: 8px 14px;
+      background: #e94560;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background 0.2s;
+      line-height: 1;
+    }
+
+    .add-tool-form button:hover {
+      background: #c73650;
+    }
+
+    .tool-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+    }
+
+    .tool-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      margin-bottom: 4px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .tool-item:hover {
+      background: #1a1a2e;
+    }
+
+    .tool-item.active {
+      background: #0f3460;
+      border-left: 3px solid #e94560;
+    }
+
+    .tool-item .tool-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .tool-item .delete-btn {
+      opacity: 0;
+      background: none;
+      border: none;
+      color: #888;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .tool-item:hover .delete-btn {
+      opacity: 1;
+    }
+
+    .tool-item .delete-btn:hover {
+      color: #e94560;
+      background: rgba(233, 69, 96, 0.1);
+    }
+
+    /* Main Content */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .main-header {
+      padding: 20px 30px;
+      border-bottom: 1px solid #0f3460;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .main-header h1 {
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .main-header .status {
+      font-size: 13px;
+      color: #888;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      color: #555;
+    }
+
+    .empty-state .icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+
+    .empty-state h3 {
+      font-size: 20px;
+      margin-bottom: 8px;
+      color: #888;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+    }
+
+    /* Tool view */
+    .tool-view {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tool-view .tool-workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .tool-view .tool-icon {
+      width: 80px;
+      height: 80px;
+      background: #0f3460;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+    }
+
+    .tool-view h2 {
+      font-size: 24px;
+    }
+
+    .tool-view .tool-description {
+      color: #888;
+      font-size: 14px;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .tool-view .run-btn {
+      padding: 12px 32px;
+      background: #e94560;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tool-view .run-btn:hover {
+      background: #c73650;
+      transform: translateY(-1px);
+    }
+
+    .tool-view .run-btn:active {
+      transform: translateY(0);
+    }
+
+    .tool-output {
+      width: 100%;
+      margin-top: 20px;
+      padding: 16px;
+      background: #0d1117;
+      border-radius: 8px;
+      border: 1px solid #0f3460;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: #7ee787;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .tool-output.visible {
+      display: block;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #555; }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">T</div>
+      <h2>Tool Dashboard</h2>
+    </div>
+    <div class="add-tool-section">
+      <form class="add-tool-form" id="addToolForm">
+        <input type="text" id="toolNameInput" placeholder="Add a tool..." autocomplete="off">
+        <button type="submit">+</button>
+      </form>
+    </div>
+    <div class="tool-list" id="toolList"></div>
+  </aside>
+
+  <main class="main">
+    <div class="main-header">
+      <h1 id="mainTitle">Dashboard</h1>
+      <span class="status" id="toolCount">0 tools</span>
+    </div>
+    <div class="main-content" id="mainContent">
+      <div class="empty-state">
+        <div class="icon">🛠️</div>
+        <h3>No tool selected</h3>
+        <p>Add a tool using the sidebar, then click it to get started.</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const tools = [];
+    let activeTool = null;
+
+    const toolList = document.getElementById('toolList');
+    const addToolForm = document.getElementById('addToolForm');
+    const toolNameInput = document.getElementById('toolNameInput');
+    const mainContent = document.getElementById('mainContent');
+    const mainTitle = document.getElementById('mainTitle');
+    const toolCount = document.getElementById('toolCount');
+
+    function save() {
+      localStorage.setItem('dashboard-tools', JSON.stringify(tools));
+    }
+
+    function load() {
+      const saved = localStorage.getItem('dashboard-tools');
+      if (saved) {
+        tools.push(...JSON.parse(saved));
+        render();
+      }
+    }
+
+    function updateCount() {
+      const n = tools.length;
+      toolCount.textContent = `${n} tool${n !== 1 ? 's' : ''}`;
+    }
+
+    function render() {
+      toolList.innerHTML = '';
+      tools.forEach((tool, i) => {
+        const el = document.createElement('div');
+        el.className = 'tool-item' + (activeTool === i ? ' active' : '');
+        el.innerHTML = `
+          <span class="tool-name">${escapeHtml(tool.name)}</span>
+          <button class="delete-btn" title="Remove tool">&times;</button>
+        `;
+        el.querySelector('.tool-name').addEventListener('click', () => selectTool(i));
+        el.querySelector('.delete-btn').addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteTool(i);
+        });
+        toolList.appendChild(el);
+      });
+      updateCount();
+    }
+
+    function selectTool(index) {
+      activeTool = index;
+      const tool = tools[index];
+      mainTitle.textContent = tool.name;
+      mainContent.innerHTML = `
+        <div class="tool-view">
+          <div class="tool-workspace">
+            <div class="tool-icon">⚡</div>
+            <h2>${escapeHtml(tool.name)}</h2>
+            <p class="tool-description">Click "Run Tool" to execute this tool.</p>
+            <button class="run-btn" id="runBtn">Run Tool</button>
+          </div>
+          <div class="tool-output" id="toolOutput"></div>
+        </div>
+      `;
+      document.getElementById('runBtn').addEventListener('click', () => runTool(tool));
+      render();
+    }
+
+    function runTool(tool) {
+      const output = document.getElementById('toolOutput');
+      output.classList.add('visible');
+      const timestamp = new Date().toLocaleTimeString();
+      output.textContent = `[${timestamp}] Running "${tool.name}"...\n[${timestamp}] Tool executed successfully.`;
+    }
+
+    function addTool(name) {
+      if (!name.trim()) return;
+      tools.push({ name: name.trim() });
+      save();
+      render();
+      selectTool(tools.length - 1);
+    }
+
+    function deleteTool(index) {
+      tools.splice(index, 1);
+      save();
+      if (activeTool === index) {
+        activeTool = null;
+        mainTitle.textContent = 'Dashboard';
+        mainContent.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">🛠️</div>
+            <h3>No tool selected</h3>
+            <p>Add a tool using the sidebar, then click it to get started.</p>
+          </div>
+        `;
+      } else if (activeTool > index) {
+        activeTool--;
+      }
+      render();
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    addToolForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      addTool(toolNameInput.value);
+      toolNameInput.value = '';
+    });
+
+    load();
+  </script>
+</body>
+</html>
